@@ -4,7 +4,7 @@ const logResponse = require('./log.js');
 const app = express();
 const port = 3000;
 
-app.post('/:id', (req, res, next) => {
+app.get('/:id', (req, res, next) => {
     const id = req.params.id;
 
     // TODO Get the medicine with the given ID from the database 
