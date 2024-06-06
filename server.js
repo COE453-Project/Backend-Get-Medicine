@@ -1,31 +1,31 @@
-const express = require('express');
-const logResponse = require('./log.js');
+// This is a google cloud function, do not run locally
+const functions = require('@google-cloud/functions-framework');
+const cors = require('cors')();
+const db = 'https://backend-database-olz2xjbmza-uc.a.run.app'
 
-const app = express();
-const port = 3000;
+functions.http('helloHttp', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  if (req.method === 'OPTIONS') {
+    res.set('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.set('Access-Control-Allow-Headers', 'access-control-allow-credentials,access-control-allow-headers,access-control-allow-methods,access-control-allow-origin,content-type');
+    console.log(`MIEN:\tCORS`)
 
-app.get('/:id', (req, res, next) => {
-    const id = req.params.id;
+    res.status(204).send('');
+  } else {
+    let id = req.query.id;
+    console.log(`MIEN:\tQuery ${id}`)
+    if (id === undefined){
+      id = req.path.split('/').pop();
+    }
+    console.log(`MIEN:\tParam ${id}`)
 
-    // TODO Get the medicine with the given ID from the database 
-    const response = {
-      id: id,
-      name: 'Amoxicillin',
-      description: 'A penicillin antibiotic that fights bacteria.',
-      productionDate: '2020-01-15',
-      expiryDate: '2022-01-15',
-      expiryStatus: 'Expired',
-      storedAtTimestamp: new Date('2020-01-15T10:32:49Z').toISOString(),
-      lastUpdatedTimestamp: new Date('2021-05-29T15:48:24Z').toISOString()
-    };
-
-    // Send the response
-    res.json(response);
-    next();
-});
-
-app.use(logResponse);
-
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+    let url = `${db}/${id}`;
+    let options = {method:'GET'}
+    const response = await fetch(url, options)
+    
+    const body = await response.json()
+    console.log(`MIEN:\tResponse ${response.status} ${body}`)
+    res.status(response.status)
+    res.send(body)
+  }
 });
